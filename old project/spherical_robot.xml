@@ -1,0 +1,43 @@
+<mujoco model="spherical_robot">
+  <compiler angle="radian"/>
+  <option gravity="0 0 -9.81" integrator="RK4" timestep="0.01"/>
+
+  <default>
+    <geom friction="1.0 0.1 0.01" density="1000"/>
+    <joint damping="0.01"/>
+  </default>
+
+  <worldbody>
+    <!-- Fixed camera -->
+    <camera name="fixed_cam" pos="1 1 1" xyaxes="1 0 0 0 1 1"/>
+
+    <!-- Ground plane -->
+    <geom name="ground" type="plane" size="2 2 0.1" friction="1.0 0.1 0.01"/>
+
+    <!-- Outer spherical shell -->
+    <body name="sphere" pos="0 0 0">
+      <!-- ✅ Add this line: make the sphere body free-floating -->
+      <joint type="free"/>
+      <inertial pos="0 0 0" mass="3.4" diaginertia="0.01 0.01 0.01"/>
+      <geom type="sphere" size="0.15" rgba="0.6 0.6 0.9 1"/>
+
+      <!-- Internal pendulum - hinge X -->
+      <body name="pendulum_x" pos="0 0 0">
+        <joint name="joint_x" type="hinge" axis="1 0 0"/>
+        <inertial pos="0 0 0" mass="0.01" diaginertia="1e-4 1e-4 1e-4"/>
+
+        <!-- Hinge Y nested inside X -->
+        <body name="pendulum_y" pos="0 0 0">
+          <joint name="joint_y" type="hinge" axis="0 1 0"/>
+          <inertial pos="0 0 0.0215" mass="0.2" diaginertia="1e-4 1e-4 1e-4"/>
+          <geom type="capsule" fromto="0 0 0 0 0 0.043" size="0.02" rgba="1 0.2 0.2 1"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <motor name="motor_x" joint="joint_x" ctrlrange="-10 10"/>
+    <motor name="motor_y" joint="joint_y" ctrlrange="-10 10"/>
+  </actuator>
+</mujoco>
